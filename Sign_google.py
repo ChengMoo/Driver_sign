@@ -6,7 +6,7 @@
 # 活动页面 不可说，只能提供一个关键字ADS
 # 适配Windows
 
-'''
+
 import sys
 
 if len(sys.argv) < 1:
@@ -15,8 +15,7 @@ if len(sys.argv) < 1:
 else:
     url = sys.argv[1]
     print("Your site: {}".format(url))
-'''
-url = "https://www.spiritlhl.top/"
+
 
 import random
 import time
@@ -89,11 +88,19 @@ def main(url):
         eles = driver.find_elements(By.TAG_NAME, 'a')
         list_urls = []
         list_site_urls = []
+    status_r = random.uniform(0,10)
+    if status_r >= 9:
+        # 回到初始页面，进行下一步操作
+        driver.switch_to.default_content()
+        eles = driver.find_elements(By.TAG_NAME, 'a')
+        for i in eles:
+            if 'google' not in i.get_attribute('href'):
+                list_urls.append(i.get_attribute('href'))
     for i in eles:
-        if 'double' in i.get_attribute('href'):
+        if 'googleadservices' in i.get_attribute('href') and status_r >= 9: #'double' in i.get_attribute('href') or 
             # continue
             list_urls.append(i.get_attribute('href'))
-        elif url in i.get_attribute('href'):
+        elif url in i.get_attribute('href') and 'google' not in i.get_attribute('href'):
             list_site_urls.append(i.get_attribute('href'))
     print(5)
     list_urls = list(set(list_urls))
@@ -120,6 +127,8 @@ def main(url):
         except:
             pass
         time.sleep(random.uniform(30, 60))
+        driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+        time.sleep(random.uniform(30, 60))
     print(7)
 
 
@@ -138,7 +147,7 @@ translator = LanguageTrans("C2E")
 if __name__ == '__main__':
     print("=================================================")
     print(translator.trans("开始脚本运行"))
-    time.sleep(random.uniform(0, 3000))
+    time.sleep(random.uniform(random.uniform(0, 1000), 2000))
     input_dependence()
     count = 0
     try:
