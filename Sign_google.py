@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python
 # -*-coding:utf-8-*-
 
 # 作者仓库:https://github.com/spiritLHL/Gecko_sign
@@ -16,7 +16,7 @@ else:
     url = sys.argv[1]
     print("Your site: {}".format(url))
 
-
+# url = "https://www.spiritlhl.top"
 import random
 import time
 from selenium.webdriver import ChromeOptions, Chrome
@@ -24,27 +24,15 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from translate import Translator
+# from translate import Translator
 
-
-class LanguageTrans():
-    def __init__(self, mode):
-        self.mode = mode
-        if self.mode == "E2C":
-            self.translator = Translator(from_lang="english", to_lang="chinese")
-        if self.mode == "C2E":
-            self.translator = Translator(from_lang="chinese", to_lang="english")
-
-    def trans(self, word):
-        translation = self.translator.translate(word)
-        return translation
 
 
 def input_dependence():
     global driver, shadow
     # 启动浏览器内核
     opt = ChromeOptions()
-    opt.headless = True
+    opt.headless = False
     # path_e = os.getcwd() + r"\buster.crx"
     # opt.add_extension(path_e)
     # path_e = os.getcwd() + r"\AutoVerify.crx"
@@ -53,16 +41,17 @@ def input_dependence():
     # opt.add_experimental_option('prefs', prefs)  # 关掉浏览器左上角的通知提示
     # opt.add_argument("disable-infobars")  # 关闭'chrome正受到自动测试软件的控制'提示
     opt.add_argument('--no-sandbox')
-    # 设置开发者模式启动，该模式下webdriver属性为正常值
-    opt.add_experimental_option('excludeSwitches', ['enable-automation'])
+    opt.add_argument("--disable-blink-features")
+    opt.add_argument("--disable-blink-features=AutomationControlled")
     opt.add_argument('--disable-gpu')
     opt.add_argument('--disable-dev-shm-usage')
     # opt.add_argument({"extensions.ui.developer_mode": True})
     # opt.add_experimental_option('useAutomationExtension', False)
     # opt.set_preference("extensions.firebug.allPagesActivation", "on")
-    opt.add_experimental_option('excludeSwitches', ['enable-logging'])
     ser = Service("chromedriver")
     driver = Chrome(service=ser, options=opt)
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+    "source": "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"})
     # 加载影子模块
     # shadow = Shadow(driver)
     driver.set_page_load_timeout(300)
@@ -84,8 +73,8 @@ def main(url):
             driver.get(url)
     print(3)
     try:
-        time.sleep(120)
-        WebDriverWait(driver, 60, 1).until(EC.visibility_of_element_located((By.NAME, 'aswift_1')))
+        time.sleep(60)
+        WebDriverWait(driver, 120, 1).until(EC.visibility_of_element_located((By.NAME, 'aswift_1')))
         driver.switch_to.frame(driver.find_element(By.NAME, 'aswift_1'))
         print(4)
         eles = driver.find_elements(By.TAG_NAME, 'a')
@@ -97,26 +86,26 @@ def main(url):
         list_urls = []
         list_site_urls = []
     status_r = random.uniform(0,10)
-    #if status_r <= 5:
-    if status_r > 0:
+    if status_r <= 5:
+    # if status_r > 5:
         # 回到初始页面，进行下一步操作
-        driver.switch_to.default_content()
-        eles = driver.find_elements(By.TAG_NAME, 'a')
+        # driver.switch_to.default_content()
+        # eles = driver.find_elements(By.TAG_NAME, 'a')
         for i in eles:
             if 'google' not in i.get_attribute('href'):
                 list_urls.append(i.get_attribute('href'))
     for i in eles:
-        if 'googleadservices' in i.get_attribute('href') and status_r >0: #= 5: #'double' in i.get_attribute('href') or
+        if 'double' in i.get_attribute('href') or 'googleadservices' in i.get_attribute('href') and status_r > 5:
             # continue
             list_urls.append(i.get_attribute('href'))
         elif url in i.get_attribute('href') and 'google' not in i.get_attribute('href'):
             list_site_urls.append(i.get_attribute('href'))
+    # print(list_urls)
     print(5)
     list_urls = list(set(list_urls))
     list_urls = random.sample(list_urls, len(list_urls))
     if len(list_urls) > 10:
         list_urls = list_urls[0:10]
-    print("clicked {} times".format(len(list_urls)))
     list_site_urls = list(set(list_site_urls))
     list_site_urls = random.sample(list_site_urls, len(list_site_urls))
     print(5.6)
@@ -125,34 +114,50 @@ def main(url):
             list_site_urls.append(i)
     list_urls.extend(list_site_urls)
     list_urls = random.sample(list_urls, len(list_urls))
+    print("clicked {} times".format(len(list_urls)))
     print(6)
     for j in list_urls:
         try:
             driver.get(j)
-            print("点击了:")
+            print("clicked:")
             print(j)
         except Exception as e:
-                print(e)
+            print(e)
+            continue
         time.sleep(random.uniform(30, 60))
         driver.execute_script('window.scrollTo(0,document.body.scrollHeight)')
         time.sleep(random.uniform(30, 60))
-        tp_url = driver.current_url
-        eles = driver.find_elements(By.TAG_NAME, 'a')
-        tp = []
-        for k in eles:
-            if tp_url in k:
-                tp.append(k)
-        if tp == []:
-            tp.append(tp_url)
-        elif len(tp) > 5:
-            tp = tp[0:6]
-        for l in tp:
-            try:
-                driver.get(l)
-                time.sleep(random.uniform(30, 60))
-            except Exception as e:
-                print(e)
+        try:
+            tp_url = driver.current_url
+            cles = driver.find_elements(By.TAG_NAME, 'a')
+            tp = []
+            for k in cles:
+                if tp_url in k:
+                    tp.append(k)
+            if tp == []:
+                tp.append(tp_url)
+            elif len(tp) > 5:
+                tp = tp[0:6]
+            for l in tp:
+                try:
+                    driver.get(l)
+                    time.sleep(random.uniform(30, 60))
+                except Exception as e:
+                    print(e)
+        except:
+            pass
     print(7)
+    try:
+        driver.get(url)
+        WebDriverWait(driver, 60, 1).until(EC.visibility_of_element_located((By.NAME, 'aswift_1')))
+    except Exception as e:
+        print(e)
+        try:
+            driver.get(url)
+            WebDriverWait(driver, 60, 1).until(EC.visibility_of_element_located((By.NAME, 'aswift_1')))
+        except Exception as e:
+            print(e)
+            driver.get(url)
 
 
 def close_driver():
@@ -163,13 +168,12 @@ def close_driver():
     except Exception as e:
         print(e)
         print("driver closed")
-    print(translator.trans("关闭浏览器内核完毕"))
+    print("closed")
 
 
-translator = LanguageTrans("C2E")
 if __name__ == '__main__':
     print("=================================================")
-    print(translator.trans("开始脚本运行"))
+    print("start")
     time.sleep(random.uniform(random.uniform(0, 500), 1000))
     input_dependence()
     count = 0
@@ -181,4 +185,4 @@ if __name__ == '__main__':
         pass
     # time.sleep(random.uniform(160, 190))
     close_driver()
-    print(translator.trans("结束脚本运行"))
+    print("closed end")
